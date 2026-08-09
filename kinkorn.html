@@ -8,11 +8,471 @@
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 
+<script type="module">
+
+  import * as pdfjsLib from
+    "https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/build/pdf.mjs";
+
+
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/build/pdf.worker.mjs";
+
+
+  /* ========================================
+     หา PDF VIEWER ทุกตัวในหน้า
+     ======================================== */
+
+  const viewers =
+    document.querySelectorAll(".pdf-viewer");
+
+
+  viewers.forEach(
+    (viewer) => {
+
+      createPDFViewer(viewer);
+
+    }
+  );
+
+
+
+  /* ========================================
+     CREATE VIEWER
+     ======================================== */
+
+  async function createPDFViewer(viewer) {
+
+    /* PDF ของ viewer นี้ */
+
+    const PDF_URL =
+      viewer.dataset.pdf;
+
+
+
+    /* ELEMENTS ของ viewer นี้ */
+
+    const container =
+      viewer.querySelector(".pdf-pages");
+
+
+    const zoomIn =
+      viewer.querySelector(".zoom-in");
+
+
+    const zoomOut =
+      viewer.querySelector(".zoom-out");
+
+
+    const zoomValue =
+      viewer.querySelector(".zoom-value");
+
+
+    const fullscreenButton =
+      viewer.querySelector(".fullscreen-pdf");
+
+
+
+    let pdfDocument = null;
+
+    let zoom = 1;
+
+
+
+    /* ========================================
+       ปรับกรอบให้สูงประมาณ 1 SLIDE
+       ======================================== */
+
+    function adjustViewerHeight() {
+
+      const firstPage =
+        container.querySelector(".pdf-page");
+
+
+      if (!firstPage) {
+        return;
+      }
+
+
+      /*
+        ถ้าอยู่ fullscreen
+        ไม่ต้องล็อกความสูงเท่า slide
+      */
+
+      if (document.fullscreenElement === viewer) {
+
+        container.style.height =
+          "calc(100vh - 56px)";
+
+        return;
+
+      }
+
+
+      const pageHeight =
+        firstPage
+          .getBoundingClientRect()
+          .height;
+
+
+      /*
+        padding:
+        12px ด้านบน
+        12px ด้านล่าง
+      */
+
+      const verticalPadding = 24;
+
+
+      container.style.height =
+        `${pageHeight + verticalPadding}px`;
+
+    }
+
+
+
+    /* ========================================
+       RENDER PDF
+       ======================================== */
+
+    async function renderPDF() {
+
+      if (!pdfDocument) {
+        return;
+      }
+
+
+      container.innerHTML = "";
+
+
+      /*
+        padding ซ้ายขวา 12 + 12
+      */
+
+      const availableWidth =
+        container.clientWidth - 24;
+
+
+
+      for (
+        let pageNumber = 1;
+        pageNumber <= pdfDocument.numPages;
+        pageNumber++
+      ) {
+
+        /* -------------------------
+           GET PAGE
+           ------------------------- */
+
+        const page =
+          await pdfDocument.getPage(
+            pageNumber
+          );
+
+
+
+        /* -------------------------
+           ORIGINAL SIZE
+           ------------------------- */
+
+        const originalViewport =
+          page.getViewport({
+            scale: 1
+          });
+
+
+
+        /* -------------------------
+           FIT WIDTH
+           ------------------------- */
+
+        const fitScale =
+          availableWidth /
+          originalViewport.width;
+
+
+
+        /* -------------------------
+           APPLY ZOOM
+           ------------------------- */
+
+        const finalScale =
+          fitScale * zoom;
+
+
+
+        const viewport =
+          page.getViewport({
+            scale: finalScale
+          });
+
+
+
+        /* -------------------------
+           CREATE CANVAS
+           ------------------------- */
+
+        const canvas =
+          document.createElement(
+            "canvas"
+          );
+
+
+        canvas.className =
+          "pdf-page";
+
+
+        const context =
+          canvas.getContext(
+            "2d"
+          );
+
+
+
+        /* Retina Display */
+
+        const outputScale =
+          Math.min(
+            window.devicePixelRatio || 1,
+            2
+          );
+
+
+
+        canvas.width =
+          Math.floor(
+            viewport.width *
+            outputScale
+          );
+
+
+        canvas.height =
+          Math.floor(
+            viewport.height *
+            outputScale
+          );
+
+
+
+        canvas.style.width =
+          `${viewport.width}px`;
+
+
+        canvas.style.height =
+          `${viewport.height}px`;
+
+
+
+        container.appendChild(
+          canvas
+        );
+
+
+
+        /* -------------------------
+           RENDER
+           ------------------------- */
+
+        await page.render({
+
+          canvasContext:
+            context,
+
+          viewport:
+            viewport,
+
+          transform: [
+            outputScale,
+            0,
+            0,
+            outputScale,
+            0,
+            0
+          ]
+
+        }).promise;
+
+      }
+
+
+
+      /* ปรับสูงเท่า 1 slide */
+
+      adjustViewerHeight();
+
+    }
+
+
+
+    /* ========================================
+       LOAD PDF
+       ======================================== */
+
+    try {
+
+      const loadingTask =
+        pdfjsLib.getDocument({
+          url: PDF_URL
+        });
+
+
+      pdfDocument =
+        await loadingTask.promise;
+
+
+      console.log(
+        "Loaded:",
+        PDF_URL,
+        pdfDocument.numPages,
+        "pages"
+      );
+
+
+      await renderPDF();
+
+    }
+
+
+    catch (error) {
+
+      console.error(
+        "PDF ERROR:",
+        PDF_URL,
+        error
+      );
+
+
+      container.innerHTML = `
+
+        <div class="pdf-loading">
+
+          <strong>
+            Unable to load PDF
+          </strong>
+
+          <br><br>
+
+          ${error.message}
+
+        </div>
+
+      `;
+
+    }
+
+
+
+    /* ========================================
+       ZOOM IN
+       ======================================== */
+
+    zoomIn.addEventListener(
+      "click",
+
+      async () => {
+
+        if (zoom >= 2) {
+          return;
+        }
+
+
+        zoom += 0.1;
+
+
+        zoomValue.textContent =
+          `${Math.round(
+            zoom * 100
+          )}%`;
+
+
+        await renderPDF();
+
+      }
+    );
+
+
+
+    /* ========================================
+       ZOOM OUT
+       ======================================== */
+
+    zoomOut.addEventListener(
+      "click",
+
+      async () => {
+
+        if (zoom <= 0.5) {
+          return;
+        }
+
+
+        zoom -= 0.1;
+
+
+        zoomValue.textContent =
+          `${Math.round(
+            zoom * 100
+          )}%`;
+
+
+        await renderPDF();
+
+      }
+    );
+
+
+
+    /* ========================================
+       FULLSCREEN
+       ======================================== */
+
+    fullscreenButton.addEventListener(
+      "click",
+
+      async () => {
+
+        if (!document.fullscreenElement) {
+
+          await viewer.requestFullscreen();
+
+        }
+
+        else {
+
+          await document.exitFullscreen();
+
+        }
+
+      }
+    );
+
+
+
+    /* ========================================
+       FULLSCREEN CHANGE
+       ======================================== */
+
+    document.addEventListener(
+      "fullscreenchange",
+
+      () => {
+
+        setTimeout(
+          adjustViewerHeight,
+          100
+        );
+
+      }
+    );
+
+  }
+
+</script>
+
 <body>
 
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="index.html">Yanatthan Kongkrajang</a>
+      <a class="brand" href="index.html">Yanatthan Kongkrajang's Portfolio</a>
       <nav class="nav">
         <a href="index.html#skills">Skills</a>
         <a href="index.html#projects">Projects</a>
@@ -26,10 +486,53 @@
       <a href="index.html">Portfolio</a><span>/</span><span>KINKORN</span>
     </div>
 
-    <h1>KINKORN</h1>
-    <p class="subtitle">Meal Pre-ordering Product · Web + Mobile</p>
+    <h1>KINKORN — Meal Pre-Ordering Platform</h1>
+    <p class="subtitle">October 2025 – April 2026</p>
 
-    <div class="hero placeholder">Replace with your project hero image</div>
+    <div class="clean-pdf pdf-viewer" data-pdf="./assets/file/kinkorn final presentation.pdf">
+    
+      <div class="clean-pdf-header">
+    
+        <span class="pdf-title">
+          KINKORN Presentation
+        </span>
+    
+        <div class="clean-pdf-actions">
+    
+          <button class="zoom-out" type="button">
+            −
+          </button>
+    
+          <span class="zoom-value">
+            100%
+          </span>
+    
+          <button class="zoom-in" type="button">
+            +
+          </button>
+    
+          <button class="fullscreen-pdf" type="button">
+            ⛶ Full screen
+          </button>
+    
+          <a href="./assets/file/kinkorn final presentation.pdf" target="_blank" rel="noopener">
+            Open PDF ↗
+          </a>
+    
+        </div>
+    
+      </div>
+    
+    
+      <div class="pdf-pages">
+    
+        <div class="pdf-loading">
+          Loading presentation...
+        </div>
+    
+      </div>
+    
+    </div>
 
     <div class="meta-grid">
       <div class="meta"><b>Role</b>Product Lead / UX/UI / Development</div>
@@ -50,28 +553,56 @@
       <li>Developed the frontend of the application using HTML, Django and Flutter.</li>
     </ul>
 
-    <h2>User Research</h2>
-    <p>Explain user pain points, personas, and the key needs that shaped the product.</p>
-    <div class="image-block">
-      <div class="placeholder">Persona / Research artifact</div>
-    </div>
-    <h2>User Flow &amp; Requirements</h2>
-    <div class="image-block">
-      <div class="placeholder">User Flow</div>
-    </div>
-    <p>Describe the major flow: browse → select meal → order → confirmation.</p>
-    <h2>Design &amp; Development</h2>
-    <p>
-      Add your web/mobile screens here and explain what you personally designed or developed.
-    </p>
-    <div class="image-block">
-      <div class="placeholder">KINKORN UI screenshots</div>
+    <div class="clean-pdf pdf-viewer" data-pdf="./assets/file/KINKORN_Final_Report.pdf">
+    
+      <div class="clean-pdf-header">
+    
+        <span class="pdf-title">
+          KINKORN Report
+        </span>
+    
+        <div class="clean-pdf-actions">
+    
+          <button class="zoom-out" type="button">
+            −
+          </button>
+    
+          <span class="zoom-value">
+            100%
+          </span>
+    
+          <button class="zoom-in" type="button">
+            +
+          </button>
+    
+          <button class="fullscreen-pdf" type="button">
+            ⛶ Full screen
+          </button>
+    
+          <a href="./assets/file/KINKORN_Final_Report.pdf" target="_blank" rel="noopener">
+            Open PDF ↗
+          </a>
+    
+        </div>
+    
+      </div>
+    
+    
+      <div class="pdf-pages">
+    
+        <div class="pdf-loading">
+          Loading presentation...
+        </div>
+    
+      </div>
+    
     </div>
 
     <div class="next-project">
       <a href="aibox.html">← AIBOX</a>
       <a href="parknai.html">Next: ParkNaiParkKorn →</a>
     </div>
+  <footer>© Yanatthan Kongkrajang — Product Portfolio</footer>
   </main>
 </body>
 

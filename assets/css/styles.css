@@ -122,7 +122,7 @@ h1{
 .image-block .placeholder{border:0;border-radius:0}
 .caption{font-size:12px;color:var(--muted);margin-top:6px}
 .next-project{
-  margin-top:52px;padding-top:18px;border-top:1px solid var(--line);
+  margin-top:52px;padding-top:18px;border-top:1px ;
   display:flex;justify-content:space-between;gap:20px;align-items:center;
 }
 .next-project a{
@@ -147,13 +147,255 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);color:#
 
 .project-cover {
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 16/9;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+
+
+/* ========================================
+   CLEAN PDF VIEWER
+   ======================================== */
+
+.clean-pdf {
+  width: 100%;
+
+  margin: 24px 0;
+
+  border: 1px solid var(--line);
+  border-radius: 10px;
+
+  overflow: hidden;
+
+  background: #ffffff;
+}
+
+
+/* ========================================
+   HEADER
+   ======================================== */
+
+.clean-pdf-header {
+
+  min-height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding: 8px 14px;
+
+  background: #ffffff;
+
   border-bottom: 1px solid var(--line);
 }
 
-.kinkorn-cover {
-  background-image: url("assets/kinkorn.svg");
+
+.pdf-title {
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  color: var(--text);
+}
+
+
+/* ========================================
+   BUTTON AREA
+   ======================================== */
+
+.clean-pdf-actions {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+}
+
+
+.clean-pdf-actions button,
+.clean-pdf-actions a {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border: 1px solid var(--line);
+
+  border-radius: 6px;
+
+  padding: 6px 10px;
+
+  background: #ffffff;
+
+  color: var(--text);
+
+  font-family: inherit;
+
+  font-size: 12px;
+
+  line-height: 1.2;
+
+  cursor: pointer;
+}
+
+
+.clean-pdf-actions button:hover,
+.clean-pdf-actions a:hover {
+
+  background: var(--soft);
+}
+
+
+#zoomValue {
+
+  min-width: 48px;
+
+  text-align: center;
+
+  font-size: 12px;
+
+  color: var(--muted);
+}
+
+
+/* ========================================
+   PDF AREA
+
+   ความสูงจะถูกกำหนดโดย JavaScript
+   ให้พอดีกับ slide แรก
+   ======================================== */
+
+.pdf-pages {
+
+  width: 100%;
+
+  height: auto;
+
+  overflow-y: auto;
+
+  overflow-x: auto;
+
+  padding: 12px;
+
+  background: #ececea;
+
+  scroll-behavior: smooth;
+}
+
+
+/* ========================================
+   EACH PDF PAGE
+   ======================================== */
+
+.pdf-page {
+
+  display: block;
+
+  max-width: none;
+
+  margin:
+    0 auto 8px auto;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, .08);
+}
+
+
+/* ========================================
+   LOADING
+   ======================================== */
+
+.pdf-loading {
+
+  padding: 60px 20px;
+
+  text-align: center;
+
+  color: var(--muted);
+
+  font-size: 14px;
+}
+
+
+/* ========================================
+   FULLSCREEN
+   ======================================== */
+
+.clean-pdf:fullscreen {
+
+  width: 100%;
+
+  height: 100%;
+
+  margin: 0;
+
+  border: 0;
+
+  border-radius: 0;
+
+  background: #ececea;
+}
+
+
+.clean-pdf:fullscreen .clean-pdf-header {
+
+  height: 56px;
+}
+
+
+.clean-pdf:fullscreen .pdf-pages {
+
+  height:
+    calc(100vh - 56px) !important;
+
+  padding: 16px;
+}
+
+
+/* ========================================
+   MOBILE
+   ======================================== */
+
+@media(max-width:720px) {
+
+  .clean-pdf-header {
+
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    padding: 10px;
+  }
+
+
+  .clean-pdf-actions {
+
+    width: 100%;
+
+    flex-wrap: wrap;
+  }
+
+
+  .pdf-pages {
+
+    padding: 8px;
+  }
+
+
+  .pdf-page {
+
+    margin-bottom: 6px;
+  }
+
 }
