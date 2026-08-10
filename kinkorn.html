@@ -9,114 +9,67 @@
 </head>
 
 <!-- ========================================
-     FIX PDF.JS FOR SAFARI / iPHONE
+     SAFARI / iPHONE COMPATIBILITY
 ======================================== -->
-
 <script>
 
-  /* Map.getOrInsert */
-
   if (!Map.prototype.getOrInsert) {
-
-    Map.prototype.getOrInsert = function (
-      key,
-      defaultValue
-    ) {
+    Map.prototype.getOrInsert = function (key, defaultValue) {
 
       if (this.has(key)) {
         return this.get(key);
       }
 
-      this.set(
-        key,
-        defaultValue
-      );
+      this.set(key, defaultValue);
 
       return defaultValue;
-
     };
-
   }
 
-
-  /* Map.getOrInsertComputed */
 
   if (!Map.prototype.getOrInsertComputed) {
-
-    Map.prototype.getOrInsertComputed = function (
-      key,
-      callback
-    ) {
+    Map.prototype.getOrInsertComputed = function (key, callback) {
 
       if (this.has(key)) {
         return this.get(key);
       }
 
-      const value =
-        callback(key);
+      const value = callback(key);
 
-      this.set(
-        key,
-        value
-      );
+      this.set(key, value);
 
       return value;
-
     };
-
   }
 
-
-  /* WeakMap.getOrInsert */
 
   if (!WeakMap.prototype.getOrInsert) {
-
-    WeakMap.prototype.getOrInsert = function (
-      key,
-      defaultValue
-    ) {
+    WeakMap.prototype.getOrInsert = function (key, defaultValue) {
 
       if (this.has(key)) {
         return this.get(key);
       }
 
-      this.set(
-        key,
-        defaultValue
-      );
+      this.set(key, defaultValue);
 
       return defaultValue;
-
     };
-
   }
 
 
-  /* WeakMap.getOrInsertComputed */
-
   if (!WeakMap.prototype.getOrInsertComputed) {
-
-    WeakMap.prototype.getOrInsertComputed = function (
-      key,
-      callback
-    ) {
+    WeakMap.prototype.getOrInsertComputed = function (key, callback) {
 
       if (this.has(key)) {
         return this.get(key);
       }
 
-      const value =
-        callback(key);
+      const value = callback(key);
 
-      this.set(
-        key,
-        value
-      );
+      this.set(key, value);
 
       return value;
-
     };
-
   }
 
 </script>
@@ -125,37 +78,34 @@
 <!-- ========================================
      PDF VIEWER
 ======================================== -->
-
 <script type="module">
 
+  /* ========================================
+     IMPORT PDF.JS
+  ======================================== */
+
   import * as pdfjsLib from
-    "https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/build/pdf.mjs";
+    "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.mjs";
 
 
   pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/build/pdf.worker.mjs";
+    "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.worker.mjs";
 
 
 
   /* ========================================
-     หา PDF VIEWER ทุกตัวในหน้า
+     FIND ALL PDF VIEWERS
   ======================================== */
 
   const viewers =
-    document.querySelectorAll(
-      ".pdf-viewer"
-    );
+    document.querySelectorAll(".pdf-viewer");
 
 
-  viewers.forEach(
-    (viewer) => {
+  viewers.forEach((viewer) => {
 
-      createPDFViewer(
-        viewer
-      );
+    createPDFViewer(viewer);
 
-    }
-  );
+  });
 
 
 
@@ -163,9 +113,7 @@
      CREATE PDF VIEWER
   ======================================== */
 
-  async function createPDFViewer(
-    viewer
-  ) {
+  async function createPDFViewer(viewer) {
 
 
     /* ========================================
@@ -182,33 +130,23 @@
     ======================================== */
 
     const container =
-      viewer.querySelector(
-        ".pdf-pages"
-      );
+      viewer.querySelector(".pdf-pages");
 
 
     const zoomIn =
-      viewer.querySelector(
-        ".zoom-in"
-      );
+      viewer.querySelector(".zoom-in");
 
 
     const zoomOut =
-      viewer.querySelector(
-        ".zoom-out"
-      );
+      viewer.querySelector(".zoom-out");
 
 
     const zoomValue =
-      viewer.querySelector(
-        ".zoom-value"
-      );
+      viewer.querySelector(".zoom-value");
 
 
     const fullscreenButton =
-      viewer.querySelector(
-        ".fullscreen-pdf"
-      );
+      viewer.querySelector(".fullscreen-pdf");
 
 
 
@@ -220,21 +158,21 @@
 
     let zoom = 1;
 
+    let resizeTimer;
+
 
 
     /* ========================================
        ADJUST VIEWER HEIGHT
 
-       ทำให้กรอบสูงประมาณ PDF 1 หน้า
+       ให้กรอบสูงประมาณ PDF 1 หน้า
     ======================================== */
 
     function adjustViewerHeight() {
 
 
       const firstPage =
-        container.querySelector(
-          ".pdf-page"
-        );
+        container.querySelector(".pdf-page");
 
 
       if (!firstPage) {
@@ -243,10 +181,6 @@
 
 
 
-      /* ========================================
-         FULLSCREEN
-      ======================================== */
-
       const isFullscreen =
 
         document.fullscreenElement === viewer ||
@@ -254,6 +188,8 @@
         document.webkitFullscreenElement === viewer;
 
 
+
+      /* FULLSCREEN */
 
       if (isFullscreen) {
 
@@ -266,9 +202,7 @@
 
 
 
-      /* ========================================
-         NORMAL MODE
-      ======================================== */
+      /* NORMAL */
 
       const pageHeight =
 
@@ -279,16 +213,17 @@
 
 
       /*
-        padding บน + ล่าง
-
         CSS .pdf-pages
+
         padding: 12px;
 
-        12 + 12 = 24
+        บน 12px
+        ล่าง 12px
+
+        = 24px
       */
 
-      const verticalPadding =
-        24;
+      const verticalPadding = 24;
 
 
 
@@ -312,27 +247,23 @@
 
 
 
-      /* ล้าง PDF เก่าก่อน render ใหม่ */
+      /* ล้าง canvas เก่าก่อน */
 
-      container.innerHTML =
-        "";
+      container.innerHTML = "";
 
 
 
       /*
-        ความกว้างพื้นที่ PDF
+        ความกว้างพื้นที่จริง
 
-        CSS padding:
-        12px ซ้าย
-        12px ขวา
+        padding ซ้าย 12px
+        padding ขวา 12px
 
         รวม 24px
       */
 
       const availableWidth =
-
-        container.clientWidth -
-        24;
+        container.clientWidth - 24;
 
 
 
@@ -344,43 +275,32 @@
 
         let pageNumber = 1;
 
-        pageNumber <=
-        pdfDocument.numPages;
+        pageNumber <= pdfDocument.numPages;
 
         pageNumber++
 
       ) {
 
 
-        /* ========================================
-           GET PAGE
-        ======================================== */
+        /* GET PAGE */
 
         const page =
-
           await pdfDocument.getPage(
             pageNumber
           );
 
 
 
-        /* ========================================
-           ORIGINAL SIZE
-        ======================================== */
+        /* ORIGINAL PAGE SIZE */
 
         const originalViewport =
-
           page.getViewport({
-
             scale: 1
-
           });
 
 
 
-        /* ========================================
-           FIT WIDTH
-        ======================================== */
+        /* FIT PDF WIDTH TO VIEWER */
 
         const fitScale =
 
@@ -390,23 +310,20 @@
 
 
 
-        /* ========================================
-           APPLY USER ZOOM
-        ======================================== */
+        /* APPLY ZOOM */
 
         const finalScale =
 
           fitScale *
+
           zoom;
 
 
 
         const viewport =
-
           page.getViewport({
 
-            scale:
-              finalScale
+            scale: finalScale
 
           });
 
@@ -417,7 +334,6 @@
         ======================================== */
 
         const canvas =
-
           document.createElement(
             "canvas"
           );
@@ -429,26 +345,24 @@
 
 
         const context =
-
           canvas.getContext(
             "2d"
           );
 
 
 
-        /* ========================================
-           RETINA / HIGH DPI
+        /*
+          Retina / iPhone / Mac
 
-           จำกัดที่ 2 เพื่อไม่ให้ PDF
-           กิน RAM มากเกินไปบนมือถือ
-        ======================================== */
+          จำกัดสูงสุด 2
+          เพื่อไม่ให้ใช้ RAM มากเกินไป
+        */
 
         const outputScale =
 
           Math.min(
 
-            window.devicePixelRatio ||
-            1,
+            window.devicePixelRatio || 1,
 
             2
 
@@ -463,6 +377,7 @@
           Math.floor(
 
             viewport.width *
+
             outputScale
 
           );
@@ -473,13 +388,14 @@
           Math.floor(
 
             viewport.height *
+
             outputScale
 
           );
 
 
 
-        /* ขนาดที่แสดงจริง */
+        /* ขนาดที่เห็นบนเว็บ */
 
         canvas.style.width =
           `${viewport.width}px`;
@@ -527,9 +443,7 @@
 
 
 
-      /* ========================================
-         ปรับกรอบให้สูงประมาณ 1 หน้า
-      ======================================== */
+      /* หลัง render เสร็จ */
 
       adjustViewerHeight();
 
@@ -545,24 +459,31 @@
 
 
       const loadingTask =
+
         pdfjsLib.getDocument({
 
-          url: PDF_URL,
+          url:
+            PDF_URL,
 
-          disableFontFace: true,
+
+          /* Character Maps */
 
           cMapUrl:
-            "https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/cmaps/",
+            "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/cmaps/",
 
-          cMapPacked: true,
+
+          cMapPacked:
+            true,
+
+
+          /* Standard fonts */
 
           standardFontDataUrl:
-            "https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/standard_fonts/",
-
-          wasmUrl:
-            "https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/wasm/"
+            "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/standard_fonts/"
 
         });
+
+
 
       pdfDocument =
 
@@ -644,8 +565,7 @@
           }
 
 
-          zoom +=
-            0.1;
+          zoom += 0.1;
 
 
 
@@ -689,8 +609,7 @@
           }
 
 
-          zoom -=
-            0.1;
+          zoom -= 0.1;
 
 
 
@@ -717,7 +636,7 @@
 
 
     /* ========================================
-       FULLSCREEN BUTTON
+       FULLSCREEN
     ======================================== */
 
     if (fullscreenButton) {
@@ -740,9 +659,7 @@
 
 
 
-            /* ========================================
-               ENTER FULLSCREEN
-            ======================================== */
+            /* ENTER FULLSCREEN */
 
             if (!isFullscreen) {
 
@@ -770,9 +687,7 @@
 
 
 
-            /* ========================================
-               EXIT FULLSCREEN
-            ======================================== */
+            /* EXIT FULLSCREEN */
 
             else {
 
@@ -865,11 +780,10 @@
     /* ========================================
        WINDOW RESIZE
 
-       หมุนมือถือ / เปลี่ยนขนาดหน้าจอ
+       เช่น
+       - หมุนมือถือ
+       - เปลี่ยนขนาด Chrome
     ======================================== */
-
-    let resizeTimer;
-
 
     window.addEventListener(
 
@@ -898,7 +812,7 @@
 
             },
 
-            200
+            250
 
           );
 
