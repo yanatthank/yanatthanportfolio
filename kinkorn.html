@@ -8,6 +8,124 @@
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 
+<!-- ========================================
+     FIX PDF.JS FOR SAFARI / iPHONE
+======================================== -->
+
+<script>
+
+  /* Map.getOrInsert */
+
+  if (!Map.prototype.getOrInsert) {
+
+    Map.prototype.getOrInsert = function (
+      key,
+      defaultValue
+    ) {
+
+      if (this.has(key)) {
+        return this.get(key);
+      }
+
+      this.set(
+        key,
+        defaultValue
+      );
+
+      return defaultValue;
+
+    };
+
+  }
+
+
+  /* Map.getOrInsertComputed */
+
+  if (!Map.prototype.getOrInsertComputed) {
+
+    Map.prototype.getOrInsertComputed = function (
+      key,
+      callback
+    ) {
+
+      if (this.has(key)) {
+        return this.get(key);
+      }
+
+      const value =
+        callback(key);
+
+      this.set(
+        key,
+        value
+      );
+
+      return value;
+
+    };
+
+  }
+
+
+  /* WeakMap.getOrInsert */
+
+  if (!WeakMap.prototype.getOrInsert) {
+
+    WeakMap.prototype.getOrInsert = function (
+      key,
+      defaultValue
+    ) {
+
+      if (this.has(key)) {
+        return this.get(key);
+      }
+
+      this.set(
+        key,
+        defaultValue
+      );
+
+      return defaultValue;
+
+    };
+
+  }
+
+
+  /* WeakMap.getOrInsertComputed */
+
+  if (!WeakMap.prototype.getOrInsertComputed) {
+
+    WeakMap.prototype.getOrInsertComputed = function (
+      key,
+      callback
+    ) {
+
+      if (this.has(key)) {
+        return this.get(key);
+      }
+
+      const value =
+        callback(key);
+
+      this.set(
+        key,
+        value
+      );
+
+      return value;
+
+    };
+
+  }
+
+</script>
+
+
+<!-- ========================================
+     PDF VIEWER
+======================================== -->
+
 <script type="module">
 
   import * as pdfjsLib from
@@ -18,18 +136,23 @@
     "https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/build/pdf.worker.mjs";
 
 
+
   /* ========================================
      หา PDF VIEWER ทุกตัวในหน้า
-     ======================================== */
+  ======================================== */
 
   const viewers =
-    document.querySelectorAll(".pdf-viewer");
+    document.querySelectorAll(
+      ".pdf-viewer"
+    );
 
 
   viewers.forEach(
     (viewer) => {
 
-      createPDFViewer(viewer);
+      createPDFViewer(
+        viewer
+      );
 
     }
   );
@@ -37,40 +160,61 @@
 
 
   /* ========================================
-     CREATE VIEWER
-     ======================================== */
+     CREATE PDF VIEWER
+  ======================================== */
 
-  async function createPDFViewer(viewer) {
+  async function createPDFViewer(
+    viewer
+  ) {
 
-    /* PDF ของ viewer นี้ */
+
+    /* ========================================
+       PDF URL
+    ======================================== */
 
     const PDF_URL =
       viewer.dataset.pdf;
 
 
 
-    /* ELEMENTS ของ viewer นี้ */
+    /* ========================================
+       ELEMENTS
+    ======================================== */
 
     const container =
-      viewer.querySelector(".pdf-pages");
+      viewer.querySelector(
+        ".pdf-pages"
+      );
 
 
     const zoomIn =
-      viewer.querySelector(".zoom-in");
+      viewer.querySelector(
+        ".zoom-in"
+      );
 
 
     const zoomOut =
-      viewer.querySelector(".zoom-out");
+      viewer.querySelector(
+        ".zoom-out"
+      );
 
 
     const zoomValue =
-      viewer.querySelector(".zoom-value");
+      viewer.querySelector(
+        ".zoom-value"
+      );
 
 
     const fullscreenButton =
-      viewer.querySelector(".fullscreen-pdf");
+      viewer.querySelector(
+        ".fullscreen-pdf"
+      );
 
 
+
+    /* ========================================
+       VARIABLES
+    ======================================== */
 
     let pdfDocument = null;
 
@@ -79,13 +223,18 @@
 
 
     /* ========================================
-       ปรับกรอบให้สูงประมาณ 1 SLIDE
-       ======================================== */
+       ADJUST VIEWER HEIGHT
+
+       ทำให้กรอบสูงประมาณ PDF 1 หน้า
+    ======================================== */
 
     function adjustViewerHeight() {
 
+
       const firstPage =
-        container.querySelector(".pdf-page");
+        container.querySelector(
+          ".pdf-page"
+        );
 
 
       if (!firstPage) {
@@ -93,12 +242,20 @@
       }
 
 
-      /*
-        ถ้าอยู่ fullscreen
-        ไม่ต้องล็อกความสูงเท่า slide
-      */
 
-      if (document.fullscreenElement === viewer) {
+      /* ========================================
+         FULLSCREEN
+      ======================================== */
+
+      const isFullscreen =
+
+        document.fullscreenElement === viewer ||
+
+        document.webkitFullscreenElement === viewer;
+
+
+
+      if (isFullscreen) {
 
         container.style.height =
           "calc(100vh - 56px)";
@@ -108,19 +265,31 @@
       }
 
 
+
+      /* ========================================
+         NORMAL MODE
+      ======================================== */
+
       const pageHeight =
+
         firstPage
           .getBoundingClientRect()
           .height;
 
 
+
       /*
-        padding:
-        12px ด้านบน
-        12px ด้านล่าง
+        padding บน + ล่าง
+
+        CSS .pdf-pages
+        padding: 12px;
+
+        12 + 12 = 24
       */
 
-      const verticalPadding = 24;
+      const verticalPadding =
+        24;
+
 
 
       container.style.height =
@@ -132,86 +301,123 @@
 
     /* ========================================
        RENDER PDF
-       ======================================== */
+    ======================================== */
 
     async function renderPDF() {
+
 
       if (!pdfDocument) {
         return;
       }
 
 
-      container.innerHTML = "";
+
+      /* ล้าง PDF เก่าก่อน render ใหม่ */
+
+      container.innerHTML =
+        "";
+
 
 
       /*
-        padding ซ้ายขวา 12 + 12
+        ความกว้างพื้นที่ PDF
+
+        CSS padding:
+        12px ซ้าย
+        12px ขวา
+
+        รวม 24px
       */
 
       const availableWidth =
-        container.clientWidth - 24;
+
+        container.clientWidth -
+        24;
 
 
+
+      /* ========================================
+         RENDER ทุกหน้า
+      ======================================== */
 
       for (
+
         let pageNumber = 1;
-        pageNumber <= pdfDocument.numPages;
+
+        pageNumber <=
+        pdfDocument.numPages;
+
         pageNumber++
+
       ) {
 
-        /* -------------------------
+
+        /* ========================================
            GET PAGE
-           ------------------------- */
+        ======================================== */
 
         const page =
+
           await pdfDocument.getPage(
             pageNumber
           );
 
 
 
-        /* -------------------------
+        /* ========================================
            ORIGINAL SIZE
-           ------------------------- */
+        ======================================== */
 
         const originalViewport =
+
           page.getViewport({
+
             scale: 1
+
           });
 
 
 
-        /* -------------------------
+        /* ========================================
            FIT WIDTH
-           ------------------------- */
+        ======================================== */
 
         const fitScale =
+
           availableWidth /
+
           originalViewport.width;
 
 
 
-        /* -------------------------
-           APPLY ZOOM
-           ------------------------- */
+        /* ========================================
+           APPLY USER ZOOM
+        ======================================== */
 
         const finalScale =
-          fitScale * zoom;
+
+          fitScale *
+          zoom;
 
 
 
         const viewport =
+
           page.getViewport({
-            scale: finalScale
+
+            scale:
+              finalScale
+
           });
 
 
 
-        /* -------------------------
+        /* ========================================
            CREATE CANVAS
-           ------------------------- */
+        ======================================== */
 
         const canvas =
+
           document.createElement(
             "canvas"
           );
@@ -221,37 +427,59 @@
           "pdf-page";
 
 
+
         const context =
+
           canvas.getContext(
             "2d"
           );
 
 
 
-        /* Retina Display */
+        /* ========================================
+           RETINA / HIGH DPI
+
+           จำกัดที่ 2 เพื่อไม่ให้ PDF
+           กิน RAM มากเกินไปบนมือถือ
+        ======================================== */
 
         const outputScale =
+
           Math.min(
-            window.devicePixelRatio || 1,
+
+            window.devicePixelRatio ||
+            1,
+
             2
+
           );
 
 
 
+        /* Canvas resolution */
+
         canvas.width =
+
           Math.floor(
+
             viewport.width *
             outputScale
+
           );
 
 
         canvas.height =
+
           Math.floor(
+
             viewport.height *
             outputScale
+
           );
 
 
+
+        /* ขนาดที่แสดงจริง */
 
         canvas.style.width =
           `${viewport.width}px`;
@@ -268,9 +496,9 @@
 
 
 
-        /* -------------------------
-           RENDER
-           ------------------------- */
+        /* ========================================
+           RENDER PAGE
+        ======================================== */
 
         await page.render({
 
@@ -281,12 +509,16 @@
             viewport,
 
           transform: [
+
             outputScale,
             0,
+
             0,
             outputScale,
+
             0,
             0
+
           ]
 
         }).promise;
@@ -295,7 +527,9 @@
 
 
 
-      /* ปรับสูงเท่า 1 slide */
+      /* ========================================
+         ปรับกรอบให้สูงประมาณ 1 หน้า
+      ======================================== */
 
       adjustViewerHeight();
 
@@ -305,40 +539,61 @@
 
     /* ========================================
        LOAD PDF
-       ======================================== */
+    ======================================== */
 
     try {
 
+
       const loadingTask =
+
         pdfjsLib.getDocument({
-          url: PDF_URL
+
+          url:
+            PDF_URL
+
         });
 
 
+
       pdfDocument =
+
         await loadingTask.promise;
 
 
+
       console.log(
+
         "Loaded:",
+
         PDF_URL,
+
         pdfDocument.numPages,
+
         "pages"
+
       );
 
 
+
       await renderPDF();
+
 
     }
 
 
     catch (error) {
 
+
       console.error(
+
         "PDF ERROR:",
+
         PDF_URL,
+
         error
+
       );
+
 
 
       container.innerHTML = `
@@ -351,7 +606,8 @@
 
           <br><br>
 
-          ${error.message}
+          Please try opening
+          the PDF directly.
 
         </div>
 
@@ -363,106 +619,284 @@
 
     /* ========================================
        ZOOM IN
-       ======================================== */
+    ======================================== */
 
-    zoomIn.addEventListener(
-      "click",
+    if (zoomIn) {
 
-      async () => {
+      zoomIn.addEventListener(
 
-        if (zoom >= 2) {
-          return;
+        "click",
+
+        async () => {
+
+
+          if (zoom >= 2) {
+            return;
+          }
+
+
+          zoom +=
+            0.1;
+
+
+
+          if (zoomValue) {
+
+            zoomValue.textContent =
+
+              `${Math.round(
+                zoom * 100
+              )}%`;
+
+          }
+
+
+
+          await renderPDF();
+
         }
 
+      );
 
-        zoom += 0.1;
-
-
-        zoomValue.textContent =
-          `${Math.round(
-            zoom * 100
-          )}%`;
-
-
-        await renderPDF();
-
-      }
-    );
+    }
 
 
 
     /* ========================================
        ZOOM OUT
-       ======================================== */
+    ======================================== */
 
-    zoomOut.addEventListener(
-      "click",
+    if (zoomOut) {
 
-      async () => {
+      zoomOut.addEventListener(
 
-        if (zoom <= 0.5) {
-          return;
+        "click",
+
+        async () => {
+
+
+          if (zoom <= 0.5) {
+            return;
+          }
+
+
+          zoom -=
+            0.1;
+
+
+
+          if (zoomValue) {
+
+            zoomValue.textContent =
+
+              `${Math.round(
+                zoom * 100
+              )}%`;
+
+          }
+
+
+
+          await renderPDF();
+
         }
 
+      );
 
-        zoom -= 0.1;
-
-
-        zoomValue.textContent =
-          `${Math.round(
-            zoom * 100
-          )}%`;
-
-
-        await renderPDF();
-
-      }
-    );
+    }
 
 
 
     /* ========================================
-       FULLSCREEN
-       ======================================== */
+       FULLSCREEN BUTTON
+    ======================================== */
 
-    fullscreenButton.addEventListener(
-      "click",
+    if (fullscreenButton) {
 
-      async () => {
+      fullscreenButton.addEventListener(
 
-        if (!document.fullscreenElement) {
+        "click",
 
-          await viewer.requestFullscreen();
+        async () => {
+
+
+          try {
+
+
+            const isFullscreen =
+
+              document.fullscreenElement ||
+
+              document.webkitFullscreenElement;
+
+
+
+            /* ========================================
+               ENTER FULLSCREEN
+            ======================================== */
+
+            if (!isFullscreen) {
+
+
+              if (
+                viewer.requestFullscreen
+              ) {
+
+                await viewer
+                  .requestFullscreen();
+
+              }
+
+
+              else if (
+                viewer.webkitRequestFullscreen
+              ) {
+
+                viewer
+                  .webkitRequestFullscreen();
+
+              }
+
+            }
+
+
+
+            /* ========================================
+               EXIT FULLSCREEN
+            ======================================== */
+
+            else {
+
+
+              if (
+                document.exitFullscreen
+              ) {
+
+                await document
+                  .exitFullscreen();
+
+              }
+
+
+              else if (
+                document.webkitExitFullscreen
+              ) {
+
+                document
+                  .webkitExitFullscreen();
+
+              }
+
+            }
+
+
+          }
+
+
+          catch (error) {
+
+
+            console.error(
+
+              "Fullscreen error:",
+
+              error
+
+            );
+
+
+          }
 
         }
 
-        else {
+      );
 
-          await document.exitFullscreen();
-
-        }
-
-      }
-    );
+    }
 
 
 
     /* ========================================
        FULLSCREEN CHANGE
-       ======================================== */
+    ======================================== */
+
+    function handleFullscreenChange() {
+
+
+      setTimeout(
+
+        adjustViewerHeight,
+
+        100
+
+      );
+
+    }
+
+
 
     document.addEventListener(
+
       "fullscreenchange",
+
+      handleFullscreenChange
+
+    );
+
+
+    document.addEventListener(
+
+      "webkitfullscreenchange",
+
+      handleFullscreenChange
+
+    );
+
+
+
+    /* ========================================
+       WINDOW RESIZE
+
+       หมุนมือถือ / เปลี่ยนขนาดหน้าจอ
+    ======================================== */
+
+    let resizeTimer;
+
+
+    window.addEventListener(
+
+      "resize",
 
       () => {
 
-        setTimeout(
-          adjustViewerHeight,
-          100
+
+        clearTimeout(
+          resizeTimer
         );
 
+
+        resizeTimer =
+
+          setTimeout(
+
+            async () => {
+
+
+              if (pdfDocument) {
+
+                await renderPDF();
+
+              }
+
+            },
+
+            200
+
+          );
+
       }
+
     );
+
 
   }
 
