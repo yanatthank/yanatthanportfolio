@@ -4,8 +4,825 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ParkNaiParkKorn — Yanatthan Kongkrajang</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="/assets/css/styles.css">
 </head>
+<!-- ========================================
+     SAFARI / iPHONE COMPATIBILITY
+======================================== -->
+<script>
+
+  if (!Map.prototype.getOrInsert) {
+    Map.prototype.getOrInsert = function (key, defaultValue) {
+
+      if (this.has(key)) {
+        return this.get(key);
+      }
+
+      this.set(key, defaultValue);
+
+      return defaultValue;
+    };
+  }
+
+
+  if (!Map.prototype.getOrInsertComputed) {
+    Map.prototype.getOrInsertComputed = function (key, callback) {
+
+      if (this.has(key)) {
+        return this.get(key);
+      }
+
+      const value = callback(key);
+
+      this.set(key, value);
+
+      return value;
+    };
+  }
+
+
+  if (!WeakMap.prototype.getOrInsert) {
+    WeakMap.prototype.getOrInsert = function (key, defaultValue) {
+
+      if (this.has(key)) {
+        return this.get(key);
+      }
+
+      this.set(key, defaultValue);
+
+      return defaultValue;
+    };
+  }
+
+
+  if (!WeakMap.prototype.getOrInsertComputed) {
+    WeakMap.prototype.getOrInsertComputed = function (key, callback) {
+
+      if (this.has(key)) {
+        return this.get(key);
+      }
+
+      const value = callback(key);
+
+      this.set(key, value);
+
+      return value;
+    };
+  }
+
+</script>
+
+
+<!-- ========================================
+     PDF VIEWER
+======================================== -->
+<script type="module">
+
+  /* ========================================
+     IMPORT PDF.JS
+  ======================================== */
+
+  import * as pdfjsLib from
+    "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.mjs";
+
+
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.worker.mjs";
+
+
+
+  /* ========================================
+     FIND ALL PDF VIEWERS
+  ======================================== */
+
+  const viewers =
+    document.querySelectorAll(".pdf-viewer");
+
+
+  viewers.forEach((viewer) => {
+
+    createPDFViewer(viewer);
+
+  });
+
+
+
+  /* ========================================
+     CREATE PDF VIEWER
+  ======================================== */
+
+  async function createPDFViewer(viewer) {
+
+
+    /* ========================================
+       PDF URL
+    ======================================== */
+
+    const PDF_URL =
+      viewer.dataset.pdf;
+
+
+
+    /* ========================================
+       ELEMENTS
+    ======================================== */
+
+    const container =
+      viewer.querySelector(".pdf-pages");
+
+
+    const zoomIn =
+      viewer.querySelector(".zoom-in");
+
+
+    const zoomOut =
+      viewer.querySelector(".zoom-out");
+
+
+    const zoomValue =
+      viewer.querySelector(".zoom-value");
+
+
+    const fullscreenButton =
+      viewer.querySelector(".fullscreen-pdf");
+
+
+
+    /* ========================================
+       VARIABLES
+    ======================================== */
+
+    let pdfDocument = null;
+
+    let zoom = 1;
+
+    let resizeTimer;
+
+
+
+    /* ========================================
+       ADJUST VIEWER HEIGHT
+
+       ให้กรอบสูงประมาณ PDF 1 หน้า
+    ======================================== */
+
+    function adjustViewerHeight() {
+
+
+      const firstPage =
+        container.querySelector(".pdf-page");
+
+
+      if (!firstPage) {
+        return;
+      }
+
+
+
+      const isFullscreen =
+
+        document.fullscreenElement === viewer ||
+
+        document.webkitFullscreenElement === viewer;
+
+
+
+      /* FULLSCREEN */
+
+      if (isFullscreen) {
+
+        container.style.height =
+          "calc(100vh - 56px)";
+
+        return;
+
+      }
+
+
+
+      /* NORMAL */
+
+      const pageHeight =
+
+        firstPage
+          .getBoundingClientRect()
+          .height;
+
+
+
+      /*
+        CSS .pdf-pages
+
+        padding: 12px;
+
+        บน 12px
+        ล่าง 12px
+
+        = 24px
+      */
+
+      const verticalPadding = 24;
+
+
+
+      container.style.height =
+        `${pageHeight + verticalPadding}px`;
+
+    }
+
+
+
+    /* ========================================
+       RENDER PDF
+    ======================================== */
+
+    async function renderPDF() {
+
+
+      if (!pdfDocument) {
+        return;
+      }
+
+
+
+      /* ล้าง canvas เก่าก่อน */
+
+      container.innerHTML = "";
+
+
+
+      /*
+        ความกว้างพื้นที่จริง
+
+        padding ซ้าย 12px
+        padding ขวา 12px
+
+        รวม 24px
+      */
+
+      const availableWidth =
+        container.clientWidth - 24;
+
+
+
+      /* ========================================
+         RENDER ทุกหน้า
+      ======================================== */
+
+      for (
+
+        let pageNumber = 1;
+
+        pageNumber <= pdfDocument.numPages;
+
+        pageNumber++
+
+      ) {
+
+
+        /* GET PAGE */
+
+        const page =
+          await pdfDocument.getPage(
+            pageNumber
+          );
+
+
+
+        /* ORIGINAL PAGE SIZE */
+
+        const originalViewport =
+          page.getViewport({
+            scale: 1
+          });
+
+
+
+        /* FIT PDF WIDTH TO VIEWER */
+
+        const fitScale =
+
+          availableWidth /
+
+          originalViewport.width;
+
+
+
+        /* APPLY ZOOM */
+
+        const finalScale =
+
+          fitScale *
+
+          zoom;
+
+
+
+        const viewport =
+          page.getViewport({
+
+            scale: finalScale
+
+          });
+
+
+
+        /* ========================================
+           CREATE CANVAS
+        ======================================== */
+
+        const canvas =
+          document.createElement(
+            "canvas"
+          );
+
+
+        canvas.className =
+          "pdf-page";
+
+
+
+        const context =
+          canvas.getContext(
+            "2d"
+          );
+
+
+
+        /*
+          Retina / iPhone / Mac
+
+          จำกัดสูงสุด 2
+          เพื่อไม่ให้ใช้ RAM มากเกินไป
+        */
+
+        const outputScale =
+
+          Math.min(
+
+            window.devicePixelRatio || 1,
+
+            2
+
+          );
+
+
+
+        /* Canvas resolution */
+
+        canvas.width =
+
+          Math.floor(
+
+            viewport.width *
+
+            outputScale
+
+          );
+
+
+        canvas.height =
+
+          Math.floor(
+
+            viewport.height *
+
+            outputScale
+
+          );
+
+
+
+        /* ขนาดที่เห็นบนเว็บ */
+
+        canvas.style.width =
+          `${viewport.width}px`;
+
+
+        canvas.style.height =
+          `${viewport.height}px`;
+
+
+
+        container.appendChild(
+          canvas
+        );
+
+
+
+        /* ========================================
+           RENDER PAGE
+        ======================================== */
+
+        await page.render({
+
+          canvasContext:
+            context,
+
+          viewport:
+            viewport,
+
+          transform: [
+
+            outputScale,
+            0,
+
+            0,
+            outputScale,
+
+            0,
+            0
+
+          ]
+
+        }).promise;
+
+      }
+
+
+
+      /* หลัง render เสร็จ */
+
+      adjustViewerHeight();
+
+    }
+
+
+
+    /* ========================================
+       LOAD PDF
+    ======================================== */
+
+    try {
+
+
+      const loadingTask =
+
+        pdfjsLib.getDocument({
+
+          url:
+            PDF_URL,
+
+
+          /* Character Maps */
+
+          cMapUrl:
+            "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/cmaps/",
+
+
+          cMapPacked:
+            true,
+
+
+          /* Standard fonts */
+
+          standardFontDataUrl:
+            "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/standard_fonts/"
+
+        });
+
+
+
+      pdfDocument =
+
+        await loadingTask.promise;
+
+
+
+      console.log(
+
+        "Loaded:",
+
+        PDF_URL,
+
+        pdfDocument.numPages,
+
+        "pages"
+
+      );
+
+
+
+      await renderPDF();
+
+
+    }
+
+
+    catch (error) {
+
+
+      console.error(
+
+        "PDF ERROR:",
+
+        PDF_URL,
+
+        error
+
+      );
+
+
+
+      container.innerHTML = `
+
+        <div class="pdf-loading">
+
+          <strong>
+            Unable to load PDF
+          </strong>
+
+          <br><br>
+
+          Please try opening
+          the PDF directly.
+
+        </div>
+
+      `;
+
+    }
+
+
+
+    /* ========================================
+       ZOOM IN
+    ======================================== */
+
+    if (zoomIn) {
+
+      zoomIn.addEventListener(
+
+        "click",
+
+        async () => {
+
+
+          if (zoom >= 2) {
+            return;
+          }
+
+
+          zoom += 0.1;
+
+
+
+          if (zoomValue) {
+
+            zoomValue.textContent =
+
+              `${Math.round(
+                zoom * 100
+              )}%`;
+
+          }
+
+
+
+          await renderPDF();
+
+        }
+
+      );
+
+    }
+
+
+
+    /* ========================================
+       ZOOM OUT
+    ======================================== */
+
+    if (zoomOut) {
+
+      zoomOut.addEventListener(
+
+        "click",
+
+        async () => {
+
+
+          if (zoom <= 0.5) {
+            return;
+          }
+
+
+          zoom -= 0.1;
+
+
+
+          if (zoomValue) {
+
+            zoomValue.textContent =
+
+              `${Math.round(
+                zoom * 100
+              )}%`;
+
+          }
+
+
+
+          await renderPDF();
+
+        }
+
+      );
+
+    }
+
+
+
+    /* ========================================
+       FULLSCREEN
+    ======================================== */
+
+    if (fullscreenButton) {
+
+      fullscreenButton.addEventListener(
+
+        "click",
+
+        async () => {
+
+
+          try {
+
+
+            const isFullscreen =
+
+              document.fullscreenElement ||
+
+              document.webkitFullscreenElement;
+
+
+
+            /* ENTER FULLSCREEN */
+
+            if (!isFullscreen) {
+
+
+              if (
+                viewer.requestFullscreen
+              ) {
+
+                await viewer
+                  .requestFullscreen();
+
+              }
+
+
+              else if (
+                viewer.webkitRequestFullscreen
+              ) {
+
+                viewer
+                  .webkitRequestFullscreen();
+
+              }
+
+            }
+
+
+
+            /* EXIT FULLSCREEN */
+
+            else {
+
+
+              if (
+                document.exitFullscreen
+              ) {
+
+                await document
+                  .exitFullscreen();
+
+              }
+
+
+              else if (
+                document.webkitExitFullscreen
+              ) {
+
+                document
+                  .webkitExitFullscreen();
+
+              }
+
+            }
+
+
+          }
+
+
+          catch (error) {
+
+
+            console.error(
+
+              "Fullscreen error:",
+
+              error
+
+            );
+
+
+          }
+
+        }
+
+      );
+
+    }
+
+
+
+    /* ========================================
+       FULLSCREEN CHANGE
+    ======================================== */
+
+    function handleFullscreenChange() {
+
+
+      setTimeout(
+
+        adjustViewerHeight,
+
+        100
+
+      );
+
+    }
+
+
+
+    document.addEventListener(
+
+      "fullscreenchange",
+
+      handleFullscreenChange
+
+    );
+
+
+    document.addEventListener(
+
+      "webkitfullscreenchange",
+
+      handleFullscreenChange
+
+    );
+
+
+
+    /* ========================================
+       WINDOW RESIZE
+
+       เช่น
+       - หมุนมือถือ
+       - เปลี่ยนขนาด Chrome
+    ======================================== */
+
+    window.addEventListener(
+
+      "resize",
+
+      () => {
+
+
+        clearTimeout(
+          resizeTimer
+        );
+
+
+        resizeTimer =
+
+          setTimeout(
+
+            async () => {
+
+
+              if (pdfDocument) {
+
+                await renderPDF();
+
+              }
+
+            },
+
+            250
+
+          );
+
+      }
+
+    );
+
+
+  }
+
+</script>
+
 <body>
 
 <header class="topbar">
@@ -15,19 +832,20 @@
       <a href="index.html#skills">Skills</a>
       <a href="index.html#projects">Projects</a>
       <a href="index.html#experience">Experience</a>
+      <a href="index.html#activities">Activities</a>
     </nav>
   </div>
 </header>
 
 <main class="page content">
   <div class="breadcrumbs">
-    <a href="index.html">Portfolio</a><span>/</span><span>ParkNaiParkKorn</span>
+    <a href="index.html">Portfolio</a><span>/</span><span>ParkNhaiParkKorn</span>
   </div>
 
-  <h1>ParkNaiParkKorn</h1>
-  <p class="subtitle">Parking Reservation · LINE Bot + IoT</p>
+  <h1>ParkNaiParkKorn — Smart Parking Reservation System</h1>
+  <p class="subtitle">Finalist, 23rd National Software Contest Thailand · August 2020 – March 2021</p>
 
-  <div class="hero placeholder">Replace with your project hero image</div>
+ 
 
   <div class="meta-grid">
     <div class="meta"><b>Type</b>Competition Project</div>
@@ -40,18 +858,58 @@
 ParkNaiParkKorn is a parking reservation solution created using LINE Bot, Python and M5StickC,
 and was a finalist in the 23rd National Thailand Computer Programming Competition.
 </p>
-<h2>Problem &amp; Idea</h2>
-<p>Explain the parking problem, who the users were, and why the proposed reservation flow helped.</p>
+
 <h2>Solution</h2>
-<div class="image-block"><div class="placeholder">System diagram / competition poster</div></div>
-<p>Show how the LINE Bot and device worked together from reservation to parking confirmation.</p>
-<h2>Outcome</h2>
-<p>Highlight the competition result and what you learned from building and presenting the system.</p>
+<div class="clean-pdf pdf-viewer" data-pdf="./assets/file/PARKNHAIPARKKORN.pdf">
+
+  <div class="clean-pdf-header">
+
+    <span class="pdf-title">
+      KINKORN Report
+    </span>
+
+    <div class="clean-pdf-actions">
+
+      <button class="zoom-out" type="button">
+        −
+      </button>
+
+      <span class="zoom-value">
+        100%
+      </span>
+
+      <button class="zoom-in" type="button">
+        +
+      </button>
+
+      <button class="fullscreen-pdf" type="button">
+        ⛶ Full screen
+      </button>
+
+      <a href="./assets/file/PARKNHAIPARKKORN.pdf" target="_blank" rel="noopener">
+        Open PDF ↗
+      </a>
+
+    </div>
+
+  </div>
+
+
+  <div class="pdf-pages">
+
+    <div class="pdf-loading">
+      Loading presentation...
+    </div>
+
+  </div>
+
+</div>
 
   <div class="next-project">
     <a href="kinkorn.html">← KINKORN</a>
     <a href="course.html">Next: Course Registration →</a>
   </div>
+  <footer>© Yanatthan Kongkrajang — Product Portfolio</footer>
 </main>
 </body>
 </html>
