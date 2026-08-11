@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Student Committee Secretary — Yanatthan Kongkrajang</title>
+
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".activity-carousel").forEach(carousel => {
+            const slides = carousel.querySelector(".activity-slides");
+            const images = carousel.querySelectorAll(".activity-slides img");
+            const prev = carousel.querySelector(".carousel-prev");
+            const next = carousel.querySelector(".carousel-next");
+            const dots = carousel.querySelector(".carousel-dots");
+
+            let currentIndex = 0;
+
+            function updateCarousel() {
+                slides.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+                dots.querySelectorAll(".carousel-dot").forEach((dot, index) => {
+                    dot.classList.toggle("active", index === currentIndex);
+                });
+            }
+
+            images.forEach((_, index) => {
+                const dot = document.createElement("button");
+                dot.className = "carousel-dot";
+                dot.type = "button";
+
+                dot.addEventListener("click", () => {
+                    currentIndex = index;
+                    updateCarousel();
+                });
+
+                dots.appendChild(dot);
+            });
+
+            if (images.length <= 1) {
+                dots.style.display = "none";
+                return;
+            }
+
+            if (next) {
+                next.addEventListener("click", () => {
+                    currentIndex = (currentIndex + 1) % images.length;
+                    updateCarousel();
+                });
+            }
+
+            if (prev) {
+                prev.addEventListener("click", () => {
+                    currentIndex = (currentIndex - 1 + images.length) % images.length;
+                    updateCarousel();
+                });
+            }
+
+            updateCarousel();
+        });
+    });
+</script>
+
+<body>
+
+    <header class="topbar">
+        <div class="topbar-inner">
+
+            <a class="brand" href="index.html">
+                Yanatthan Kongkrajang's Portfolio
+            </a>
+
+            <nav class="nav">
+                <a href="index.html#skills">Skills</a>
+                <a href="index.html#projects">Projects</a>
+                <a href="index.html#experience">Experience</a>
+                <a href="index.html#activities">Activities</a>
+            </nav>
+
+        </div>
+    </header>
+
+
+    <main class="page content">
+
+        <div class="breadcrumbs">
+            <a href="index.html">Portfolio</a>
+            <span>/</span>
+            <a href="index.html#activities">Activities</a>
+            <span>/</span>
+            <span>Student Committee Secretary</span>
+        </div>
+
+
+        <h1>Student Committee Secretary</h1>
+
+        <p class="subtitle">
+            Thammasat School of Engineering
+        </p>
+
+        <div class="activity-hero">
+            <img src="./assets/รับรางวัล.JPG" alt="Student Committee at Thammasat School of Engineering">
+        </div>
+
+
+        <div class="meta-grid">
+
+            <div class="meta">
+                <b>Role</b>
+                Student Committee Secretary
+            </div>
+
+            <div class="meta">
+                <b>Period</b>
+                Jun 2024 — May 2025
+            </div>
+
+            <div class="meta">
+                <b>Organization</b>
+                Thammasat School of Engineering
+            </div>
+
+        </div>
+
+
+        <h2>Overview</h2>
+
+        <p>
+            Served as Student Committee Secretary at Thammasat School of
+            Engineering, supporting communication between students, faculty
+            members, and external university teams while coordinating faculty
+            activities and managing official documentation.
+        </p>
+
+
+        <h2>Responsibilities</h2>
+
+        <ul>
+            <li>
+                Served as a key point of coordination between students,
+                faculty members, and external university teams.
+            </li>
+
+            <li>
+                Coordinated and supported faculty-wide events and student
+                activities, including orientations, first-meet activities,
+                and engineering faculty events.
+            </li>
+
+            <li>
+                Managed official documents, meeting records, and administrative
+                information for the Student Committee.
+            </li>
+
+            <li>
+                Coordinated tasks, schedules, and follow-ups with committee
+                members to ensure activities were completed as planned.
+            </li>
+
+            <li>
+                Supported on-site event operations and collaborated with
+                multiple teams to resolve issues during activities.
+            </li>
+        </ul>
+
+        <h2>Photos</h2>
+        
+        <div class="photo-grid">
+        
+            <figure class="photo-card">
+                <div class="activity-carousel">
+                    <div class="activity-slides">
+                        <img src="./assets/3sao all.JPEG" alt="3 Sao CSR activity">
+                        <img src="./assets/3sao1.jpg" alt="3 Sao CSR activity">
+                        <img src="./assets/3sao me.JPEG" alt="3 Sao CSR activity">
+                        <img src="./assets/3sao2.jpg" alt="3 Sao CSR activity">
+                        <img src="./assets/3sao3.jpg" alt="3 Sao CSR activity">
+                    </div>
+            
+                    <button class="carousel-btn carousel-prev" type="button" aria-label="Previous photo">‹</button>
+                    <button class="carousel-btn carousel-next" type="button" aria-label="Next photo">›</button>
+            
+                    <div class="carousel-dots"></div>
+                </div>
+            
+                <figcaption>
+                    <strong>3 Sao CSR</strong>
+                    <p>
+                        A CSR collaboration between Chulalongkorn University, Thammasat University,
+                        and Kasetsart University
+                    </p>
+                    <ul>
+                        <li>Coordinated activity planning and execution with student teams from all three universities.</li>
+                        <li>Contributed to CSR initiatives focused on school improvement and facility renovation.</li>
+                    </ul>
+                </figcaption>
+            </figure>
+
+            <figure class="photo-card">
+                <div class="activity-carousel">
+                    <div class="activity-slides">
+                        <img src="./assets/Byenior.JPG" alt="Byenior activity">
+                    </div>
+            
+                    <div class="carousel-dots"></div>
+                </div>
+                <figcaption>
+                    <strong>Byenior TSE33</strong>
+                    <p>
+                        Part of the Organizing Committee for Byenior TSE33
+                    </p>
+                    <ul>
+                        <li>Coordinated event logistics and operations with internal organizing teams.</li>
+                        <li>Liaised with the hotel and external service providers to arrange venue, schedules, and event requirements</li>
+                    </ul>
+                </figcaption>
+            </figure>
+
+            <figure class="photo-card">
+                <div class="activity-carousel">
+                    <div class="activity-slides">
+                        <img src="./assets/seminarkn.JPEG" alt="Seminar KN activity">
+                        <img src="./assets/seminar2.JPG" alt="Seminar KN activity">
+                        <img src="./assets/seminar1.JPG" alt="Seminar KN activity">
+                        <img src="./assets/seminar4.JPEG" alt="Seminar KN activity">
+                        <img src="./assets/seminar3.JPG" alt="Seminar KN activity">
+                    </div>
+            
+                    <button class="carousel-btn carousel-prev" type="button" aria-label="Previous photo">‹</button>
+                    <button class="carousel-btn carousel-next" type="button" aria-label="Next photo">›</button>
+            
+                    <div class="carousel-dots"></div>
+                </div>
+            
+                <figcaption>
+                    <strong>Student Committee Seminar</strong>
+                    <p>
+                        An internal seminar organized for the Student Committee
+                        of Thammasat School of Engineering. Served as part of the organizing and Activities Team
+                    </p>
+                    <ul>
+                        <li>Coordinated event arrangements with the hotel and external service providers.</li>
+                        <li>Planned and coordinated event activities, schedules, and on-site operations with the organizing team.</li>
+                    </ul>
+                </figcaption>
+            </figure>
+
+            <figure class="photo-card">
+                <div class="activity-carousel">
+                    <div class="activity-slides">
+                        <img src="./assets/kn all.JPEG" alt="TSE activity">
+                        <img src="./assets/openhouse.JPG" alt="TSE activity">
+                        <img src="./assets/pattaya.JPEG" alt="TSE activity">
+                        <img src="./assets/open house present.JPG" alt="TSE activity">
+                        <img src="./assets/openhouse 1 .jpg" alt="TSE activity">
+                        <img src="./assets/openhousewater.jpg" alt="TSE activity">
+                        <img src="./assets/ทาสี.jpg" alt="TSE activity">
+                    </div>
+            
+                    <button class="carousel-btn carousel-prev" type="button" aria-label="Previous photo">‹</button>
+                    <button class="carousel-btn carousel-next" type="button" aria-label="Next photo">›</button>
+            
+                    <div class="carousel-dots"></div>
+                </div>
+            
+                <figcaption>
+                    <strong>Faculty Support & Coordination</strong>
+                    <p>
+                        Supported faculty-wide events such as Open House, Orientation,
+                        and other student activities at Thammasat School of Engineering.
+                    </p>
+                    <ul>
+                        <li>Coordinated with faculty staff to understand event requirements and support needs.</li>
+                        <li>Worked with the Student Committee team to plan tasks, activities, and event operations based on faculty requirements.</li>
+                        <li>Supported on-site coordination and helped ensure activities were carried out smoothly.</li>
+                    </ul>
+                </figcaption>
+            </figure>
+
+
+
+        
+        </div>
+        <h2>Skills Developed</h2>
+
+        <div class="tags">
+            <span class="tag">Leadership</span>
+            <span class="tag">Communication</span>
+            <span class="tag">Coordination</span>
+            <span class="tag">Event Planning</span>
+            <span class="tag">Documentation</span>
+            <span class="tag">Teamwork</span>
+            <span class="tag">Problem Solving</span>
+            <span class="tag">Time Management</span>
+        </div>
+
+
+
+
+
+        <div class="next-project">
+
+            <a href="index.html#activities">
+                ← Back to Activities
+            </a>
+
+            <a href="seminar.html">
+                Three Universities Seminar →
+            </a>
+
+        </div>
+    <footer>© Yanatthan Kongkrajang — Portfolio</footer>
+    </main>
+
+</body>
+
+</html>
