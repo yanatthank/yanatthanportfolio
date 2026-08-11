@@ -704,3 +704,214 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);color:#
   }
 
 }
+
+/* ========================================
+   PHOTO GALLERY
+   ======================================== */
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.photo-card {
+  margin: 0;
+  overflow: hidden;
+
+  border: 1px solid var(--line);
+  border-radius: 10px;
+
+  background: #fff;
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease;
+}
+
+.photo-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(15, 15, 15, .08);
+}
+
+.photo-card img {
+  display: block;
+
+  width: 100%;
+  aspect-ratio: 4 / 3;
+
+  object-fit: cover;
+  object-position: center;
+
+  background: var(--soft);
+}
+
+.photo-card figcaption {
+  padding: 10px 12px;
+
+  color: #5f5e5b;
+
+  font-size: 13px;
+  line-height: 1.45;
+
+  border-top: 1px solid var(--line);
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+  .photo-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+/* ========================================
+   ACTIVITY PHOTO CAROUSEL
+   ======================================== */
+
+.activity-carousel {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.activity-slides {
+  display: flex;
+  width: 100%;
+
+  transition: transform .35s ease;
+}
+
+.activity-slides img {
+  flex: 0 0 100%;
+
+  width: 100%;
+  aspect-ratio: 4 / 3;
+
+  object-fit: cover;
+
+  border: 0;
+}
+
+
+/* BUTTON */
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, .9);
+  color: #37352f;
+
+  font-size: 25px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transform: translateY(-50%);
+
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .15);
+
+  opacity: 0;
+
+  transition:
+    opacity .18s ease,
+    background .18s ease;
+}
+
+.carousel-prev {
+  left: 10px;
+}
+
+.carousel-next {
+  right: 10px;
+}
+
+.activity-carousel:hover .carousel-btn {
+  opacity: 1;
+}
+
+.carousel-btn:hover {
+  background: #fff;
+}
+
+
+/* DOTS */
+
+.carousel-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+
+  display: flex;
+  gap: 6px;
+
+  transform: translateX(-50%);
+}
+
+.carousel-dot {
+  width: 7px;
+  height: 7px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, .6);
+
+  cursor: pointer;
+}
+
+.carousel-dot.active {
+  background: #fff;
+}
+
+
+/* CAPTION */
+
+.photo-card figcaption strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: var(--text);
+
+  font-size: 14px;
+}
+
+.photo-card figcaption p {
+  margin: 0;
+
+  color: var(--muted);
+
+  font-size: 13px;
+
+  line-height: 1.5;
+}
+
+.activity-hero {
+  margin: 24px 0 30px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.activity-hero img {
+  display: block;
+  width: 100%;
+  object-position: center;
+}
