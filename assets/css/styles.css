@@ -915,3 +915,28 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);color:#
   width: 100%;
   object-position: center;
 }
+
+.education-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  background: #fff;
+  margin-top: 20px;
+}
+
+.education-content h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.education-degree {
+  margin: 0 0 5px;
+  color: var(--text);
+}
+
+.education-date {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+}
